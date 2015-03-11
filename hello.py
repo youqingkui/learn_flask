@@ -21,17 +21,6 @@ from datetime import datetime
 
 app = Flask(__name__)
 
-
-
-manager = Manager(app)
-bootstrap = Bootstrap(app)
-moment = Moment(app)
-db = SQLAlchemy(app)
-mail = Mail(app)
-
-migrate = Migrate(app, db)
-manager.add_command('db', MigrateCommand)
-
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:@localhost/flask'
 app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN'] = True
 app.config['SECRET_KEY'] = 'hard to guess string'
@@ -51,6 +40,15 @@ print(app.config['MAIL_USERNAME'])
 print(app.config['MAIL_PASSWORD'])
 print(app.config['FLASKY_ADMIN'])
 
+manager = Manager(app)
+bootstrap = Bootstrap(app)
+moment = Moment(app)
+db = SQLAlchemy(app)
+mail = Mail(app)
+
+migrate = Migrate(app, db)
+manager.add_command('db', MigrateCommand)
+
 def send_async_email(app, msg):
     with app.app_context():
         mail.send(msg)
@@ -60,6 +58,7 @@ def send_email(to, subject, template, **kwargs):
                   sender=app.config['FLASKY_MAIL_SENDER'], recipients=[to])
     msg.body = render_template(template + '.txt', **kwargs)
     msg.html = render_template(template + '.html', **kwargs)
+    print(msg)
     thr = Thread(target=send_async_email, args=[app, msg])
     thr.start()
     return thr
